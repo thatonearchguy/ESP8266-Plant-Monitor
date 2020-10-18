@@ -9,20 +9,19 @@
 #include <ESP8266httpUpdate.h>
 
 
-
 /*------------------S   E   R   I   A   L       N   U   M   B   E   R-----------------------*/
 
 const char* serialNo = "ESP01";
-const int FW_VERSION = 0001;
+const int FW_VERSION = 0002;
 
 /*------------------------------------------------------------------------------------------*/
+
 
 void readvalues();
 void reconnect();
 void sendMQTTmessage();
-uint32_t calculateCRC32( const uint8_t *data, size_t length );
 void WriteRTCValues();
-
+uint32_t calculateCRC32( const uint8_t *data, size_t length );
 
 
 // R T C   M E M O R Y
@@ -37,11 +36,11 @@ bool rtcValid = false;
 //Normally it should only ever accumulate 8 measurements before it is overwritten...
 
 
-
 // B H 1 7 5 0   O P T I O N S
 BH1750 lightMeter;
 float lux = 0;
 const int lightMeterPin = 15;
+
 
 // S i 7 0 2 1   O P T I O N S
 bool enableHeater = false;
@@ -50,11 +49,13 @@ float humidity = 0;
 float temperature = 0;
 const int Si7021Pin = 13;
 
+
 // S O I L   M O I S T U R E   O P T I O N S
 const int AirValue = 864;   //Value of Soil Moisture sensor in air.
 const int WaterValue = 435;  //Value of Soil Moisture sensor fully submerged in water (not including electronics obviously!)
 int soilMoistureValue = 0;
 const int soilMoisturePin = 12;
+
 
 // T I M E  &  N E T W O R K   R E L A T E D   S T U F F
 const char* WLAN_SSID = "CC7C Hyperoptic 1Gb Fibre 2.4Ghz";
@@ -62,6 +63,7 @@ const char* WLAN_PASSWD = "DQtpESbjxJSS";
 const char* mqtt_server = "192.168.1.99";
 WiFiClient espClient;
 PubSubClient client(espClient);
+
 
 void setup() {
   Serial.begin(9600); // open serial port, set the baud rate to 9600 bps
@@ -91,15 +93,6 @@ void readvalues() {
   humidity = Si7021.readHumidity();
   temperature = Si7021.readTemperature();
   yield();
-  //debug statements, will remove later to clean up code and save cpu cycles. Later revisions may have sensor reading alongside wifi code to harness scheduling and save time
-  Serial.print("Light");
-  Serial.println(lux);
-  Serial.print("Soil Moisture");
-  Serial.println(soilMoistureValue);
-  Serial.print("Humidity");
-  Serial.println(humidity);
-  Serial.print("Temperature");
-  Serial.println(temperature);
 }
 
 void loop() {
@@ -151,10 +144,11 @@ void loop() {
     delay(50);
     wifiStatus = WiFi.status();
   }
-
+  //Successful connection! Printing IP Address
   Serial.println("WiFi connected!");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
+  //Writes RTC values of connection
   WriteRTCValues();
   client.setServer(mqtt_server, 1883); //Initialising MQTT Connection
   readvalues(); //Reads values from sensors
